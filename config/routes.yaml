@@ -1,0 +1,22 @@
+# https://symfony.com/doc/current/routing.html
+
+# config/routes.yaml
+# These lines define a route using YAML configuration. The controller used by
+# the route (FrameworkBundle:Template:template) is a convenient shortcut when
+# the template can be rendered without executing any logic in your own controller.
+# See https://symfony.com/doc/current/templates.html#rendering-a-template-directly-from-a-route
+controllers:
+  resource:
+    path: ../src/Framework/Controller/
+    namespace: Framework\Controller
+  type: attribute
+  # https://symfony.com/doc/current/translation.html#the-locale-and-the-url
+  prefix: /{_locale}
+
+  # An imported route with an empty URL will become "/blog/"
+  # Uncomment this option to make that URL "/blog" instead
+  # trailing_slash_on_root: false
+
+  # you can optionally exclude some files/subdirectories when loading attributes
+  # (the value must be a string or an array of PHP glob patterns)
+  # exclude: '../src/Controller/{Debug*Controller.php}'

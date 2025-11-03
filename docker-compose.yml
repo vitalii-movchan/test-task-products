@@ -1,0 +1,107 @@
+version: '3.3'
+
+volumes:
+  creedo-products-postgres-data:
+    driver: local
+  creedo-products-eventstore-volume-data:
+    driver: local
+  creedo-products-eventstore-volume-logs:
+    driver: local
+
+networks:
+  creedo-products-network:
+    driver: bridge
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: creedo-products-nginx
+    volumes:
+      - ./:/var/www/creedo-products
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - creedo-products-network
+    ports:
+      - "${SERVER_PORT:-80}:80"
+      - "${SERVER_SSL_PORT:-443}:443"
+    restart: on-failure
+    tty: true
+    depends_on:
+      - app
+  app:
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+      args:
+        # user
+        USER_ID: "${USER_ID:-1000}"
+        USER_NAME: "${USER_NAME:-admin}"
+        GROUP_ID: "${GROUP_ID:-1000}"
+        GROUP_NAME: "${GROUP_NAME:-admin}"
+        # xdebug
+        XDEBUG_VERSION: "${XDEBUG_VERSION:-3.1.6}"
+        XDEBUG_CLIENT_PORT: "${XDEBUG_CLIENT_PORT:-9000}"
+        XDEBUG_IDE_KEY: "${XDEBUG_IDE_KEY:-PHPSTORM}"
+    container_name: creedo-products-app
+    volumes:
+      - ./:/var/www/creedo-products
+    networks:
+      - creedo-products-network
+    restart: on-failure
+    tty: true
+    depends_on:
+      - db
+    extra_hosts:
+      - host.docker.internal:host-gateway
+  db:
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    container_name: creedo-products-postgres
+    volumes:
+      - creedo-products-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      # Use postgres/example user/password credentials
+      POSTGRES_USER: "${POSTGRES_USER:-user}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-password}"
+    networks:
+      - creedo-products-network
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    restart: on-failure
+    tty: true
+  eventstore:
+    build:
+      context: .
+      dockerfile: docker/eventstore/Dockerfile
+    container_name: creedo-products-eventstore
+    environment:
+      EVENTSTORE_CLUSTER_SIZE: 1
+      EVENTSTORE_RUN_PROJECTIONS: All
+      EVENTSTORE_START_STANDARD_PROJECTIONS: true
+      EVENTSTORE_EXT_TCP_PORT: 1113
+      EVENTSTORE_HTTP_PORT: 2113
+      EVENTSTORE_INSECURE: true
+      EVENTSTORE_ENABLE_EXTERNAL_TCP: true
+      EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP: true
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+    volumes:
+      - creedo-products-eventstore-volume-data:/var/lib/eventstore
+      - creedo-products-eventstore-volume-logs:/var/log/eventstore
+    networks:
+      - creedo-products-network
+    restart: on-failure
+    tty: true

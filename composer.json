@@ -1,0 +1,50 @@
+{
+    "name": "creedo/products",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "symfony/routing": "^7.2",
+        "symfony/config": "^7.2",
+        "symfony/http-kernel": "^7.2",
+        "symfony/validator": "^7.2",
+        "symfony/dependency-injection": "^7.2",
+        "symfony/translation": "^7.2",
+        "symfony/serializer": "^7.2",
+        "symfony/property-access": "^7.2",
+        "symfony/messenger": "^7.3",
+        "doctrine/doctrine-bundle": "^2.14",
+        "symfony/yaml": "^7.3",
+        "symfony/runtime": "^7.3",
+        "symfony/debug-bundle": "^7.2",
+        "symfony/monolog-bundle": "^3.10",
+        "symfony/loco-translation-provider": "^7.3",
+        "symfony/flex": "^2.7",
+        "symfony/dotenv": "^7.3",
+        "ramsey/uuid": "4.9.0 as 3.9.3",
+        "ecotone/symfony-bundle": "^1.259",
+        "prooph/event-store": "dev-master",
+        "prooph/event-store-client": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "src/Application/",
+            "Core\\": "src/Core/",
+            "Domain\\": "src/Domain/",
+            "Framework\\": "src/Framework/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": true,
+            "symfony/flex": true
+        }
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

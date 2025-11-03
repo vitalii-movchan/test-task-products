@@ -1,0 +1,5 @@
+# https://docs.ecotone.tech/modules/symfony/symfony-ddd-cqrs-event-sourcing
+
+# config/packages/prod/ecotone.yaml
+ecotone:
+  #
